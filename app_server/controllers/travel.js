@@ -21,12 +21,11 @@ const travel = async function (req, res, next) {
         json = [];
       } else {
         if (!json.length) {
-          message = "No trips exist in out database!";
-        }
+          message = "No trips exist in our database!"; 
+        }      
       }
-   
-      res.render("travel", { title: "Travlr Getaways", trips: json,});
-    })
+      res.render("travel", { title: "Travlr Getaways", trips: json, message });
+      })
     .catch((err) => res.status(500).send(err.message));
 };
 
