@@ -1,14 +1,15 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+// src/app/app.config.ts
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-
 import { routes } from './app.routes';
+import { authInterceptProvider } from './utils/jwt-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient()
+    importProvidersFrom(HttpClientModule), // shows as deprecated, but okay in older templates
+    authInterceptProvider
   ]
 };
+

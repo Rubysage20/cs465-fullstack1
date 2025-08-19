@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripCardComponent } from '../trip-card/trip-card.component';
-
 import { TripDataService } from '../services/trip-data.service';
+import { AuthenticationService } from '../services/authentication.service';
 import { trips } from '../data/trips';
 import { Trip } from '../models/trip';
 import { Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, TripCardComponent],
   templateUrl: './trip-listing.component.html',
-  styleUrls: ['./trip-listing.component.css'],
+  styleUrl: './trip-listing.component.css',
   providers: [TripDataService]
   
 })
@@ -25,11 +25,15 @@ message: string = '';
 
   constructor(
     private tripDataService: TripDataService, 
-    private router: Router ) {
+    private router: Router,
+    private authenticationService: AuthenticationService) {
     console.log('trip-listing constructor');
   } 
   public addTrip(): void {
     this.router.navigate(['add-trip']);
+  }
+  public isLoggedIn(): boolean {
+    return this.authenticationService.isLoggedIn();
   }
 
   private getStuff(): void {
