@@ -1,13 +1,12 @@
 // app_api/routes/index.js
 const express = require('express');
+const router = express.Router();
 const jwt = require('jsonwebtoken');
 
 const tripsController = require('../controllers/trips');
 const authController = require('../controllers/authentication');
 
-const router = express.Router();
-
-/** JWT auth middleware: expects "Authorization: Bearer <token>" */
+/** JWT auth middleware: expects "Authorization: Bearer <token)" */
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers['authorization'];
 
@@ -15,22 +14,17 @@ function authenticateJWT(req, res, next) {
     return res.status(401).json({ message: 'Authorization header missing or malformed' });
   }
 
-  const parts = authHeader.split(' ');
-  if (parts.length < 2) {
-    return res.status(401).json({ message: 'Authorization header must be: Bearer <token>' });
-  }
-
-  const token = parts[1];
+  const token = authHeader.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'Bearer token not provided' });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ message: 'Token validation error', error: err.message });
+      return res.status(401).json({ message: 'Token validation error', error: err.message });
     }
-    req.auth = decoded;            // attach decoded payload for controllers
-    return next();                 // proceed only on successful verify
+    req.auth = decoded; // attach decoded payload for controllers
+    next();
   });
 }
 
@@ -39,16 +33,16 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 
 /* ---------- Trip endpoints ---------- */
-// List trips (public)
-router.get('/trips', tripsController.tripsList);
+// List trips (public), Create trip (protected)
+router
+  .route('/trips')
+  .get(tripsController.tripsList)
+  .post(authenticateJWT, tripsController.tripsAddTrip);
 
-// Create trip (protected)
-router.post('/trips', authenticateJWT, tripsController.tripsAddTrip);
-
-// Get trip by code (public)
-router.get('/trips/:tripCode', tripsController.tripsFindByCode);
-
-// Update trip by code (protected)
-router.put('/trips/:tripCode', authenticateJWT, tripsController.tripsUpdateTrip);
+// Get one trip (public), Update trip (protected)
+router
+  .route('/trips/:tripCode')
+  .get(tripsController.tripsFindByCode)
+  .put(authenticateJWT, tripsController.tripsUpdateTrip);
 
 module.exports = router;
